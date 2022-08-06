@@ -21,6 +21,7 @@ extern "C"
 #include <string.h>
 #include <ctype.h>
 #include "Exports.h"
+#include "hlai.h"
 
 #include "vgui_TeamFortressViewport.h"
 
@@ -735,6 +736,7 @@ void CL_DLLEXPORT CL_CreateMove ( float frametime, struct usercmd_s *cmd, int ac
 {	
 //	RecClCL_CreateMove(frametime, cmd, active);
 
+	
 	float spd;
 	vec3_t viewangles;
 	static vec3_t oldangles;
@@ -751,30 +753,37 @@ void CL_DLLEXPORT CL_CreateMove ( float frametime, struct usercmd_s *cmd, int ac
 		
 		gEngfuncs.SetViewAngles( (float *)viewangles );
 
-		if ( in_strafe.state & 1 )
+		if ( !hlai.IsEnabled() ) 
 		{
-			cmd->sidemove += cl_sidespeed->value * CL_KeyState (&in_right);
-			cmd->sidemove -= cl_sidespeed->value * CL_KeyState (&in_left);
-		}
+			if ( in_strafe.state & 1 )
+			{
+				cmd->sidemove += cl_sidespeed->value * CL_KeyState (&in_right);
+				cmd->sidemove -= cl_sidespeed->value * CL_KeyState (&in_left);
+			}
 
-		cmd->sidemove += cl_sidespeed->value * CL_KeyState (&in_moveright);
-		cmd->sidemove -= cl_sidespeed->value * CL_KeyState (&in_moveleft);
+			cmd->sidemove += cl_sidespeed->value * CL_KeyState (&in_moveright);
+			cmd->sidemove -= cl_sidespeed->value * CL_KeyState (&in_moveleft);
 
-		cmd->upmove += cl_upspeed->value * CL_KeyState (&in_up);
-		cmd->upmove -= cl_upspeed->value * CL_KeyState (&in_down);
+			cmd->upmove += cl_upspeed->value * CL_KeyState (&in_up);
+			cmd->upmove -= cl_upspeed->value * CL_KeyState (&in_down);
 
-		if ( !(in_klook.state & 1 ) )
-		{	
-			cmd->forwardmove += cl_forwardspeed->value * CL_KeyState (&in_forward);
-			cmd->forwardmove -= cl_backspeed->value * CL_KeyState (&in_back);
-		}	
+			if ( !(in_klook.state & 1 ) )
+			{	
+				cmd->forwardmove += cl_forwardspeed->value * CL_KeyState (&in_forward);
+				cmd->forwardmove -= cl_backspeed->value * CL_KeyState (&in_back);
+			}	
 
-		// adjust for speed key
-		if ( in_speed.state & 1 )
+			// adjust for speed key
+			if ( in_speed.state & 1 )
+			{
+				cmd->forwardmove *= cl_movespeedkey->value;
+				cmd->sidemove *= cl_movespeedkey->value;
+				cmd->upmove *= cl_movespeedkey->value;
+			}
+		} 
+		else 
 		{
-			cmd->forwardmove *= cl_movespeedkey->value;
-			cmd->sidemove *= cl_movespeedkey->value;
-			cmd->upmove *= cl_movespeedkey->value;
+			cmd->forwardmove = cl_forwardspeed->value;
 		}
 
 		// clip to maxspeed

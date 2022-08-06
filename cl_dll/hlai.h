@@ -1,5 +1,11 @@
+#pragma once
+#include <cstdint>
+
 class HLAI {
     public:
-        int Init( void );
-    
+        void Init( void );
+        void ServerInit( void );
+        bool IsEnabled( void );
 };
+
+extern HLAI hlai;

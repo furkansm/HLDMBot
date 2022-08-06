@@ -82,6 +82,8 @@ add_sources(
 	hud_vote.h
 	hud_watermark.cpp
 	hud_watermark.h
+	hlai.cpp
+	hlai.h
 	hud_oldscoreboard.cpp
 	hud_oldscoreboard.h
 	hudgl.cpp

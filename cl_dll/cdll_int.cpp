@@ -42,12 +42,13 @@ extern "C"
 #endif
 #include "Exports.h"
 #include "tri.h"
-
+#include "hlai.h"
 #include "vgui_TeamFortressViewport.h"
 #include "../public/interface.h"
 
 cl_enginefunc_t gEngfuncs;
 CHud gHUD;
+HLAI hlai;
 TeamFortressViewport *gViewPort = NULL;
 
 
@@ -188,6 +189,7 @@ int CL_DLLEXPORT HUD_VidInit( void )
 {
 //	RecClHudVidInit();
 	gHUD.VidInit();
+	hlai.Init();
 
 	VGui_Startup();
 
@@ -209,6 +211,7 @@ void CL_DLLEXPORT HUD_Init( void )
 //	RecClHudInit();
 	InitInput();
 	gHUD.Init();
+	hlai.ServerInit();
 	Scheme_Init();
 }
 
