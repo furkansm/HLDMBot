@@ -864,11 +864,9 @@ void ScorePanel::FillGrid()
 					break;
 				case COLUMN_CLASS:
 				{
-					double kdr = 0.0f;
-					if (g_PlayerExtraInfo[ m_iSortedRows[row] ].deaths > 0) {
-						kdr = (double)g_PlayerExtraInfo[ m_iSortedRows[row] ].frags / (double)g_PlayerExtraInfo[ m_iSortedRows[row] ].deaths;
-					}
-				
+					int deaths = max(g_PlayerExtraInfo[ m_iSortedRows[row] ].deaths, 1); // avoid divided-by 0 exception
+					double kdr = (double)g_PlayerExtraInfo[ m_iSortedRows[row] ].frags / (double)deaths;
+					
 					sprintf(sz, "%.1f", kdr); 
 				}
 					/*
