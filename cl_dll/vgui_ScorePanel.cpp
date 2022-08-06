@@ -63,7 +63,7 @@ SBColumnInfo g_ColumnInfo[NUM_COLUMNS] =
 {
 	{NULL,			24,			Label::a_east},		// tracker column
 	{NULL,			136,		Label::a_east},		// name
-	{"SteamID",		60,			Label::a_east},		// class
+	{"KDR",		60,			Label::a_east},		// kill death ratio (CLASS)
 	{"#SCORE",		40,			Label::a_east},
 	{"#DEATHS",		46,			Label::a_east},
 	{"#LATENCY",	46,			Label::a_east},
@@ -818,7 +818,8 @@ void ScorePanel::FillGrid()
 					break;
 				case COLUMN_LATENCY:
 					if ( m_iIsATeam[row] == TEAM_YES )
-						sprintf(sz, "%d/%d", team_info->ping, team_info->packetloss );
+						//sprintf(sz, "%d/%d", team_info->ping, team_info->packetloss );
+						sprintf(sz, "%d", team_info->ping );
 					break;
 				default:
 					break;
@@ -862,6 +863,15 @@ void ScorePanel::FillGrid()
 					GetClientVoiceMgr()->UpdateSpeakerImage(pLabel, m_iSortedRows[row]);
 					break;
 				case COLUMN_CLASS:
+				{
+					double kdr = 0.0f;
+					if (g_PlayerExtraInfo[ m_iSortedRows[row] ].deaths > 0) {
+						kdr = (double)g_PlayerExtraInfo[ m_iSortedRows[row] ].frags / (double)g_PlayerExtraInfo[ m_iSortedRows[row] ].deaths;
+					}
+				
+					sprintf(sz, "%.1f", kdr); 
+				}
+					/*
 					// No class for other team's members (unless allied or spectator)
 					if ( gViewPort && EV_TFC_IsAllyTeam( g_iTeamNumber, g_PlayerExtraInfo[ m_iSortedRows[row] ].teamnumber )  )
 						bShowClass = true;
@@ -893,6 +903,7 @@ void ScorePanel::FillGrid()
 					{
 						snprintf(sz, ARRAYSIZE(sz), "%s", steam_id::get_steam_id(m_iSortedRows[row] - 1).c_str());
 					}
+					*/
 					break;
 
 				case COLUMN_TRACKER:
@@ -940,7 +951,9 @@ void ScorePanel::FillGrid()
 					sprintf(sz, "%d",  g_PlayerExtraInfo[ m_iSortedRows[row] ].deaths );
 					break;
 				case COLUMN_LATENCY:
-					sprintf(sz, "%d/%d", g_PlayerInfoList[ m_iSortedRows[row] ].ping, g_PlayerInfoList[m_iSortedRows[row]].packetloss );
+					sprintf(sz, "%d", g_PlayerInfoList[ m_iSortedRows[row] ].ping );
+					
+					//sprintf(sz, "%d/%d", g_PlayerInfoList[ m_iSortedRows[row] ].ping, g_PlayerInfoList[m_iSortedRows[row]].packetloss );
 					break;
 #endif
 				default:
