@@ -712,6 +712,12 @@ void CL_AdjustAngles ( float frametime, float *viewangles )
 	if (up || down)
 		V_StopPitchDrift ();
 		
+	if (hlai.IsEnabled()) 
+	{
+		viewangles[YAW] = hlai.input_yaw;
+		viewangles[PITCH] = hlai.input_pitch;
+	}
+
 	if (viewangles[PITCH] > cl_pitchdown->value)
 		viewangles[PITCH] = cl_pitchdown->value;
 	if (viewangles[PITCH] < -cl_pitchup->value)
@@ -753,37 +759,37 @@ void CL_DLLEXPORT CL_CreateMove ( float frametime, struct usercmd_s *cmd, int ac
 		
 		gEngfuncs.SetViewAngles( (float *)viewangles );
 
-		if ( !hlai.IsEnabled() ) 
+		if ( in_strafe.state & 1 )
 		{
-			if ( in_strafe.state & 1 )
-			{
-				cmd->sidemove += cl_sidespeed->value * CL_KeyState (&in_right);
-				cmd->sidemove -= cl_sidespeed->value * CL_KeyState (&in_left);
-			}
+			cmd->sidemove += cl_sidespeed->value * CL_KeyState (&in_right);
+			cmd->sidemove -= cl_sidespeed->value * CL_KeyState (&in_left);
+		}
 
-			cmd->sidemove += cl_sidespeed->value * CL_KeyState (&in_moveright);
-			cmd->sidemove -= cl_sidespeed->value * CL_KeyState (&in_moveleft);
+		cmd->sidemove += cl_sidespeed->value * CL_KeyState (&in_moveright);
+		cmd->sidemove -= cl_sidespeed->value * CL_KeyState (&in_moveleft);
 
-			cmd->upmove += cl_upspeed->value * CL_KeyState (&in_up);
-			cmd->upmove -= cl_upspeed->value * CL_KeyState (&in_down);
+		cmd->upmove += cl_upspeed->value * CL_KeyState (&in_up);
+		cmd->upmove -= cl_upspeed->value * CL_KeyState (&in_down);
 
-			if ( !(in_klook.state & 1 ) )
-			{	
-				cmd->forwardmove += cl_forwardspeed->value * CL_KeyState (&in_forward);
-				cmd->forwardmove -= cl_backspeed->value * CL_KeyState (&in_back);
-			}	
+		if ( !(in_klook.state & 1 ) )
+		{	
+			cmd->forwardmove += cl_forwardspeed->value * CL_KeyState (&in_forward);
+			cmd->forwardmove -= cl_backspeed->value * CL_KeyState (&in_back);
+		}	
 
-			// adjust for speed key
-			if ( in_speed.state & 1 )
-			{
-				cmd->forwardmove *= cl_movespeedkey->value;
-				cmd->sidemove *= cl_movespeedkey->value;
-				cmd->upmove *= cl_movespeedkey->value;
-			}
-		} 
-		else 
+		// adjust for speed key
+		if ( in_speed.state & 1 )
 		{
-			cmd->forwardmove = cl_forwardspeed->value;
+			cmd->forwardmove *= cl_movespeedkey->value;
+			cmd->sidemove *= cl_movespeedkey->value;
+			cmd->upmove *= cl_movespeedkey->value;
+		}
+
+		if ( hlai.IsEnabled() ) 
+		{	
+			cmd->sidemove = hlai.input_sidemove * cl_sidespeed->value;
+			cmd->forwardmove = hlai.input_forwardmove * cl_forwardspeed->value;
+			cmd->upmove = hlai.input_upmove * cl_upspeed->value;
 		}
 
 		// clip to maxspeed
@@ -815,6 +821,20 @@ void CL_DLLEXPORT CL_CreateMove ( float frametime, struct usercmd_s *cmd, int ac
 	// set button and flag bits
 	//
 	cmd->buttons = CL_ButtonBits( 1 );
+
+	if ( hlai.IsEnabled() ) 
+	{
+		if (hlai.input_jump) 
+			cmd->buttons |= IN_JUMP;
+		if (hlai.input_attack1) 
+			cmd->buttons |= IN_ATTACK;
+		if (hlai.input_attack2) 
+			cmd->buttons |= IN_ATTACK2;
+		if (hlai.input_reload) 
+			cmd->buttons |= IN_RELOAD;
+		if (hlai.input_reload) 
+			cmd->buttons |= IN_DUCK;
+	}
 
 	if (in_ducktap.state & 1)
 	{

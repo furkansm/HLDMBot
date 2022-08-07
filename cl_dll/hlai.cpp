@@ -5,8 +5,6 @@
 //
 #include <cmath>
 #include <cstring>
-
-
 #include "hlai.h"
 #include "hud.h"
 #include "cl_util.h"
