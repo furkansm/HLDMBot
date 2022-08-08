@@ -5,7 +5,11 @@ class Vector;
 
 struct AIWaypoint {
     Vector location;
-    AIWaypoint(Vector location) : location(location) {}
+    int id;
+    int group;
+    AIWaypoint* next = NULL;
+
+    AIWaypoint(Vector location, int id, int group) : location(location), id(id), group(group) {}
 };
 
 class HLAI {
@@ -14,11 +18,10 @@ class HLAI {
         void ServerInit( void );
         void Update( void );
         bool IsEnabled( void );
-        AIWaypoint* ClosestWaypoint( void );
 
         /* From 0 to 1 */
         float input_sidemove = 0.0f;
-        float input_forwardmove = 1.0f;
+        float input_forwardmove = 0.0f;
         float input_upmove = 0.0f;
 
         bool input_jump = false;

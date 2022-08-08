@@ -211,7 +211,6 @@ void CL_DLLEXPORT HUD_Init( void )
 //	RecClHudInit();
 	InitInput();
 	gHUD.Init();
-	hlai.ServerInit();
 	Scheme_Init();
 }
 
