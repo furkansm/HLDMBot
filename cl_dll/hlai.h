@@ -7,7 +7,14 @@ struct AIWaypoint {
     Vector location;
     int id;
     int group;
-    AIWaypoint* next = NULL;
+    int next = -1;
+
+    AIWaypoint* GetNext() {
+        if (next == -1)
+            return NULL;
+
+        return &hlai.waypoints[next];
+    }
 
     AIWaypoint(Vector location, int id, int group) : location(location), id(id), group(group) {}
 };

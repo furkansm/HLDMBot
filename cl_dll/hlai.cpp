@@ -19,9 +19,15 @@ enum AIState {
 };
 
 bool AI_InitDone = false;
-std::vector<AIWaypoint> AI_WaypointHistory;
+std::vector<AIWaypoint*> AI_WaypointHistory;
 
 void _callback_hlai_addwaypoint_cmdgen() {
+    
+    for(auto wp : hlai.waypoints) {
+        ConsolePrint(wp.next != NULL ? "OK" : "NULL");
+        ConsolePrint("\n");
+    }
+
     auto pos = gEngfuncs.GetLocalPlayer()->origin;
     ConsolePrint("hlai_addwaypoint ");
     ConsolePrint(std::to_string(pos.x).c_str());
@@ -43,16 +49,17 @@ void _callback_hlai_addwaypoint() {
     float x = atof(gEngfuncs.Cmd_Argv(1));
     float y = atof(gEngfuncs.Cmd_Argv(2));
     float z = atof(gEngfuncs.Cmd_Argv(3));
-    AIWaypoint way(Vector(x, y, z), hlai.waypoints.size() + 1, atoi(gEngfuncs.Cmd_Argv(4)));
+    auto waypoint = new AIWaypoint(Vector(x, y, z), hlai.waypoints.size(), atoi(gEngfuncs.Cmd_Argv(4)));
 
     if (!hlai.waypoints.empty()) {
         auto lastWaypoint = hlai.waypoints.back();
         
-        if (lastWaypoint.group == way.group) {
-            lastWaypoint.next = &way;
+        if (lastWaypoint.group == waypoint->group) {
+            ConsolePrint("Added");
+            lastWaypoint.next = waypoint->id;
         }
     }
-    hlai.waypoints.push_back(way);
+    hlai.waypoints.push_back(*waypoint);
 }
 
 void _callback_hlai_clearwaypoints() {
@@ -81,7 +88,7 @@ AIWaypoint* _ai_get_closest_waypoint( int excludeGroup = -1, int excludeLastWayp
     float minDist = FLT_MAX;
     AIWaypoint* closestWaypoint = NULL;
     excludeLastWaypointCount = min(AI_WaypointHistory.size(), excludeLastWaypointCount);
-    std::vector<AIWaypoint> _excludedWaypoints(AI_WaypointHistory.end() - excludeLastWaypointCount, AI_WaypointHistory.end());
+    std::vector<AIWaypoint*> _excludedWaypoints(AI_WaypointHistory.end() - excludeLastWaypointCount, AI_WaypointHistory.end());
 
     for (auto &waypoint : hlai.waypoints)
     {
@@ -91,7 +98,7 @@ AIWaypoint* _ai_get_closest_waypoint( int excludeGroup = -1, int excludeLastWayp
         }
 
         for (auto &excluded : _excludedWaypoints) { // Exclude if we visited this waypoint before
-            if (excluded.id == waypoint.id) {
+            if (excluded->id == waypoint.id) {
                 abort = true;
                 break;
             }   
@@ -102,8 +109,6 @@ AIWaypoint* _ai_get_closest_waypoint( int excludeGroup = -1, int excludeLastWayp
 
 
         auto dist = ( waypoint.location - pos ).Length();
-        dist += waypoint.id * 5;
-
         if (dist < minDist) {
             minDist = dist;
             closestWaypoint = &waypoint;
@@ -128,6 +133,7 @@ void HLAI::Init( void ) {
 void HLAI::ServerInit( void ) {
     _callback_hlai_clearwaypoints();
     EngineClientCmd("exec waypoints.cfg");
+
 }
 
 AIWaypoint* AI_TargetWaypoint = NULL;
@@ -154,7 +160,7 @@ void HLAI::Update( void ) {
         break;
     
     case NAVIGATE:
-        if (AI_TargetWaypoint != NULL && _get_distance(AI_TargetWaypoint->location) < 150.0f) {
+        if (AI_TargetWaypoint != NULL && _get_distance(AI_TargetWaypoint->location) < 50.0f) {
             AI_TargetWaypoint = NULL;
             AI_State = IDLE;
             ConsolePrint("Waypoint done, idling\n");
@@ -162,17 +168,18 @@ void HLAI::Update( void ) {
         }
         
         if (AI_TargetWaypoint == NULL) {
-            AIWaypoint* lastWaypoint = NULL;
-            if (!AI_WaypointHistory.empty()) 
-                lastWaypoint = &AI_WaypointHistory.back();
-
-            if (lastWaypoint->next != NULL) {
-                AI_TargetWaypoint = lastWaypoint->next;
-            } else {
-                AI_TargetWaypoint = _ai_get_closest_waypoint();//(!AI_WaypointHistory.empty() ? AI_WaypointHistory.back().group : -1);
+            AI_TargetWaypoint = _ai_get_closest_waypoint();//(!AI_WaypointHistory.empty() ? AI_WaypointHistory.back().group : -1);
+            if (!AI_WaypointHistory.empty()) {
+                auto lastWaypoint = AI_WaypointHistory.back();
+                ConsolePrint(lastWaypoint->next == NULL ? "NULLNEXT " : "");
+                
+                if (lastWaypoint->next != NULL) {
+                    ConsolePrint("NEXT ");
+                    AI_TargetWaypoint = lastWaypoint->GetNext();
+                }
             }
-
-            AI_WaypointHistory.push_back(*AI_TargetWaypoint);
+            
+            AI_WaypointHistory.push_back(AI_TargetWaypoint);
             AI_LastWaypointChangeTime = _get_now();
 
             ConsolePrint("Waypoint Group ");
