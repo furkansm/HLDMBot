@@ -171,7 +171,7 @@ void HLAI::Update( void ) {
         if (AI_TargetWaypoint != NULL)
             distanceToWaypoint = _get_distance(AI_TargetWaypoint->location);
 
-        if (AI_TargetWaypoint != NULL && _get_distance(AI_TargetWaypoint->location) < 90.0f) {
+        if (AI_TargetWaypoint != NULL && _get_distance(AI_TargetWaypoint->location) < 90.0f) { // Claim waypoint if we are close to it
             AI_TargetWaypoint = NULL;
             AI_State = IDLE;
             ConsolePrint("Waypoint done, idling.\n");
@@ -179,16 +179,15 @@ void HLAI::Update( void ) {
         }
         
         if (AI_TargetWaypoint == NULL) {
-            AI_TargetWaypoint = _ai_get_closest_waypoint( AI_IgnoreGroup );//(!AI_WaypointHistory.empty() ? AI_WaypointHistory.back().group : -1);
+            AI_TargetWaypoint = _ai_get_closest_waypoint( AI_IgnoreGroup ); // Select the closest waypoint
             if (!AI_WaypointHistory.empty()) {
                 auto lastWaypoint = AI_WaypointHistory.back();
-                ConsolePrint(lastWaypoint->next == NULL ? "NULLNEXT " : std::to_string(lastWaypoint->next).c_str());
                 
-                if (lastWaypoint->next != -1 && !AI_ForceNewWaypoint) {
+                if (lastWaypoint->next != -1 && !AI_ForceNewWaypoint) { // Select the next waypoint of the previous waypoint
                     AI_TargetWaypoint = hlai.waypoints[lastWaypoint->next];
                 }
 
-                if (lastWaypoint->next == -1) {
+                if (lastWaypoint->next == -1) { // If we've completed the entire waypoint group, ignore it for a while 
                     AI_IgnoreGroup = lastWaypoint->group;
                 }
 
@@ -207,13 +206,13 @@ void HLAI::Update( void ) {
             ConsolePrint("\n");
         }
 
-        if (timeSpentNavigating >= 2 && distanceToWaypoint < 100 ) {
+        if (timeSpentNavigating >= 2 && distanceToWaypoint < 100) { // Start jumping after 2 secs.
             input_jump = true;
         }
 
-        if (timeSpentNavigating >= 3) { // If the AI had been stuck for the last 2 seconds, remove the waypoint
+        if (timeSpentNavigating >= 3) { // If the AI had been stuck for the last 3 seconds, remove the waypoint
             
-            if (distanceToWaypoint > 800) {
+            if (distanceToWaypoint > 800) { // Select new waypoint if we are far apart from current waypoint group
                 AI_ForceNewWaypoint = true;
             }
             AI_TargetWaypoint = NULL;
@@ -227,9 +226,9 @@ void HLAI::Update( void ) {
         break;
     
     default:
+    // NOT POSSIBLE
         break;
     }
-    //input_yaw = _get_vector_angle(ClosestWaypoint()->location, gEngfuncs.GetLocalPlayer()->origin);
 }
 
 bool HLAI::IsEnabled( void ) {
