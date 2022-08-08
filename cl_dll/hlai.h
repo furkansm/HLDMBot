@@ -8,14 +8,6 @@ struct AIWaypoint {
     int id;
     int group;
     int next = -1;
-
-    AIWaypoint* GetNext() {
-        if (next == -1)
-            return NULL;
-
-        return &hlai.waypoints[next];
-    }
-
     AIWaypoint(Vector location, int id, int group) : location(location), id(id), group(group) {}
 };
 
@@ -41,7 +33,7 @@ class HLAI {
         float input_yaw = 0.0f;  
         float input_pitch = 0.0f;
 
-        std::vector<AIWaypoint> waypoints;
+        std::vector<AIWaypoint*> waypoints;
 };
 
 extern HLAI hlai;

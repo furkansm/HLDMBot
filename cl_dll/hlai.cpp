@@ -24,7 +24,7 @@ std::vector<AIWaypoint*> AI_WaypointHistory;
 void _callback_hlai_addwaypoint_cmdgen() {
     
     for(auto wp : hlai.waypoints) {
-        ConsolePrint(wp.next != NULL ? "OK" : "NULL");
+        ConsolePrint(wp->next != -1 ? "OK" : "NULL");
         ConsolePrint("\n");
     }
 
@@ -54,12 +54,14 @@ void _callback_hlai_addwaypoint() {
     if (!hlai.waypoints.empty()) {
         auto lastWaypoint = hlai.waypoints.back();
         
-        if (lastWaypoint.group == waypoint->group) {
-            ConsolePrint("Added");
-            lastWaypoint.next = waypoint->id;
+        if (lastWaypoint->group == waypoint->group) {
+            lastWaypoint->next = waypoint->id;
+            ConsolePrint("Added: ");
+            ConsolePrint(std::to_string(lastWaypoint->next).c_str());
+            ConsolePrint("\n");
         }
     }
-    hlai.waypoints.push_back(*waypoint);
+    hlai.waypoints.push_back(waypoint);
 }
 
 void _callback_hlai_clearwaypoints() {
@@ -93,12 +95,12 @@ AIWaypoint* _ai_get_closest_waypoint( int excludeGroup = -1, int excludeLastWayp
     for (auto &waypoint : hlai.waypoints)
     {
         bool abort = false;
-        if (waypoint.group == excludeGroup) {
+        if (waypoint->group == excludeGroup) {
             continue;
         }
 
         for (auto &excluded : _excludedWaypoints) { // Exclude if we visited this waypoint before
-            if (excluded->id == waypoint.id) {
+            if (excluded->id == waypoint->id) {
                 abort = true;
                 break;
             }   
@@ -108,10 +110,10 @@ AIWaypoint* _ai_get_closest_waypoint( int excludeGroup = -1, int excludeLastWayp
             continue;
 
 
-        auto dist = ( waypoint.location - pos ).Length();
+        auto dist = ( waypoint->location - pos ).Length();
         if (dist < minDist) {
             minDist = dist;
-            closestWaypoint = &waypoint;
+            closestWaypoint = waypoint;
         }
     }
 
@@ -171,11 +173,11 @@ void HLAI::Update( void ) {
             AI_TargetWaypoint = _ai_get_closest_waypoint();//(!AI_WaypointHistory.empty() ? AI_WaypointHistory.back().group : -1);
             if (!AI_WaypointHistory.empty()) {
                 auto lastWaypoint = AI_WaypointHistory.back();
-                ConsolePrint(lastWaypoint->next == NULL ? "NULLNEXT " : "");
+                ConsolePrint(lastWaypoint->next == NULL ? "NULLNEXT " : std::to_string(lastWaypoint->next).c_str());
                 
-                if (lastWaypoint->next != NULL) {
+                if (lastWaypoint->next != -1) {
                     ConsolePrint("NEXT ");
-                    AI_TargetWaypoint = lastWaypoint->GetNext();
+                    AI_TargetWaypoint = hlai.waypoints[lastWaypoint->next];
                 }
             }
             
