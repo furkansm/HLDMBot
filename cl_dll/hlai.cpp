@@ -158,6 +158,7 @@ void HLAI::Update( void ) {
         return;
     
     long int timeSpentNavigating;
+    float distanceToWaypoint = 0;
 
     switch (AI_State)
     {
@@ -167,10 +168,13 @@ void HLAI::Update( void ) {
     
     case NAVIGATE:
         timeSpentNavigating = _get_now() - AI_LastWaypointChangeTime;
-        if (AI_TargetWaypoint != NULL && _get_distance(AI_TargetWaypoint->location) < 20.0f) {
+        if (AI_TargetWaypoint != NULL)
+            distanceToWaypoint = _get_distance(AI_TargetWaypoint->location);
+
+        if (AI_TargetWaypoint != NULL && _get_distance(AI_TargetWaypoint->location) < 90.0f) {
             AI_TargetWaypoint = NULL;
             AI_State = IDLE;
-            ConsolePrint("Waypoint done, idling\n");
+            ConsolePrint("Waypoint done, idling.\n");
             break;
         }
         
@@ -203,13 +207,13 @@ void HLAI::Update( void ) {
             ConsolePrint("\n");
         }
 
-        if (timeSpentNavigating >= 2) {
+        if (timeSpentNavigating >= 2 && distanceToWaypoint < 100 ) {
             input_jump = true;
         }
 
         if (timeSpentNavigating >= 3) { // If the AI had been stuck for the last 2 seconds, remove the waypoint
-            auto dist = _get_distance(AI_TargetWaypoint->location);
-            if (dist > 800) {
+            
+            if (distanceToWaypoint > 800) {
                 AI_ForceNewWaypoint = true;
             }
             AI_TargetWaypoint = NULL;
@@ -217,7 +221,7 @@ void HLAI::Update( void ) {
             break;
         }
         
-        input_yaw = _lerp(input_yaw, _get_vector_angle(AI_TargetWaypoint->location, gEngfuncs.GetLocalPlayer()->origin), 0.1f); // Look at waypoint
+        input_yaw = _lerp(input_yaw, _get_vector_angle(AI_TargetWaypoint->location, gEngfuncs.GetLocalPlayer()->origin), 0.08f); // Look at waypoint
         input_forwardmove = 1.0f; // Move forward
 
         break;
