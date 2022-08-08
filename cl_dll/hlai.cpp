@@ -30,15 +30,12 @@ void _callback_hlai_addwaypoint() {
         return;
     }
 
-    int x = atoi(gEngfuncs.Cmd_Argv(1));
-    int y = atoi(gEngfuncs.Cmd_Argv(2));
-    int z = atoi(gEngfuncs.Cmd_Argv(3));
+    float x = atof(gEngfuncs.Cmd_Argv(1));
+    float y = atof(gEngfuncs.Cmd_Argv(2));
+    float z = atof(gEngfuncs.Cmd_Argv(3));
     AIWaypoint way(Vector(x, y, z));
 
     hlai.waypoints.push_back(way);
-
-    ConsolePrint(std::to_string(x).c_str());
-    ConsolePrint("\n");
 }
 
 void HLAI::Init( void ) {
