@@ -1,6 +1,13 @@
 #pragma once
 #include <cstdint>
 
+class Vector;
+
+struct AIWaypoint {
+    Vector location;
+    AIWaypoint(Vector location) : location(location) {}
+};
+
 class HLAI {
     public:
         void Init( void );
@@ -22,6 +29,8 @@ class HLAI {
         /* Unit is degrees */
         float input_yaw = 0.0f;  
         float input_pitch = 0.0f;
+
+        std::vector<AIWaypoint> waypoints;
 };
 
 extern HLAI hlai;

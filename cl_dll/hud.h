@@ -112,6 +112,7 @@ struct HUDLIST {
 #include "hud_vote.h"
 #include "hud_watermark.h"
 #include "rainbow.h"
+#include "hlai.h"
 
 
 //
