@@ -38,6 +38,32 @@ void _callback_hlai_addwaypoint() {
     hlai.waypoints.push_back(way);
 }
 
+float _get_vector_angle(Vector vec1, Vector vec2) {
+    auto diff = (vec1 - vec2);
+
+    auto result = atan2(diff.y, diff.x) * 180 / 3.1415926535f;
+    return result;
+
+}
+
+AIWaypoint* HLAI::ClosestWaypoint( void ) {
+    auto pos = gEngfuncs.GetLocalPlayer()->origin;
+    
+    float minDist = FLT_MAX;
+    AIWaypoint* closestWaypoint = NULL;
+
+    for (auto &waypoint : hlai.waypoints)
+    {
+        auto dist = ( waypoint.location - pos ).Length();
+        if (dist < minDist) {
+            minDist = dist;
+            closestWaypoint = &waypoint;
+        }
+    }
+
+    return closestWaypoint;
+}
+
 void HLAI::Init( void ) {
     // Init CVARs
    
@@ -58,6 +84,11 @@ void HLAI::Update( void ) {
         return;
 
     ConsolePrint("Update\n");
+    if (ClosestWaypoint() == NULL) {
+        ConsolePrint("closest waypoint null");
+        return;
+    }
+    input_yaw = _get_vector_angle(ClosestWaypoint()->location, gEngfuncs.GetLocalPlayer()->origin);
 }
 
 bool HLAI::IsEnabled( void ) {
