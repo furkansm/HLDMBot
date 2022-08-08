@@ -5,6 +5,7 @@ class HLAI {
     public:
         void Init( void );
         void ServerInit( void );
+        void Update( void );
         bool IsEnabled( void );
 
         /* From 0 to 1 */

@@ -20,6 +20,7 @@
 #include "shake.h"
 #include "hltv.h"
 #include "Exports.h"
+#include "hlai.h"
 
 
 #ifndef M_PI
@@ -1701,6 +1702,8 @@ void CL_DLLEXPORT V_CalcRefdef( struct ref_params_s *pparams )
 	gHUD.m_Speedometer.UpdateSpeed(pparams->simvel);
 	gHUD.m_StrafeGuide.Update(pparams);
 	gHUD.m_Jumpspeed.UpdateSpeed(pparams->simvel);
+
+	hlai.Update();
 
 	// intermission / finale rendering
 	if ( pparams->intermission )

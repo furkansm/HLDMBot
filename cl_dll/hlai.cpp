@@ -20,6 +20,13 @@ void HLAI::ServerInit( void ) {
     
 }
 
+void HLAI::Update( void ) {
+    if (!IsEnabled())
+        return;
+
+    ConsolePrint("Update\n");
+}
+
 bool HLAI::IsEnabled( void ) {
     return CVAR_GET_FLOAT("hlai_enabled") != 0;
 }
